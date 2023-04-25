@@ -6,3 +6,4 @@ b = float(b)
 c = float(c)
 result = a + b + c / 3
 print(round(result, 3))
+# second exercise
