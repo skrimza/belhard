@@ -9,4 +9,8 @@ while i <= d:
         else:
             print(i, end=', ')
     i += 2
-    
+
+
+# new lesson for functions
+
+
