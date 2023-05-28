@@ -1,7 +1,7 @@
-# * Дан список чисел, необходимо для каждого элемента 
-# посчитать сумму его соседей, для крайних чисел 
-# одним из соседей является число с противоположной
-# стороны списка
+# * the list of numbers is given, need for each element
+# calculate the sum neighbour, for extreme numbers, 
+# one of the neighbors is an element located on the 
+# opposite side
 
 def sum_numbers():
     listen = [1, 2, 3, 4, 5, 6, 7]
@@ -11,7 +11,7 @@ def sum_numbers():
     else:
         diction.update({listen[i+1]: (listen[i]+listen[0])})
     print(diction)
-    # return ({listen[i]: (listen[i-1] + listen[i+1]) 
-    #          for i in range(len(listen)-1)})
+
+
 sum_numbers()
 
