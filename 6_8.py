@@ -17,10 +17,10 @@ def find_country(city_message):
             'Keln'
         ]
     }
-    for country, city in country_city.items():
-        for i in city:
+    for country, cities in country_city.items():
+        for i in cities:
             if i == city_message.capitalize():
-                print(country)
+                print(cities)
 
 find_country(input('input city: '))
 
