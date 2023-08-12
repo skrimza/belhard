@@ -253,3 +253,28 @@ print('Список обновлен', new_category.categories)
 # print("Area:", rectangle.calculate_area())
 # print("Perimeter:", rectangle.calculate_perimeter())
 
+
+# class Product:
+
+#     def __init__(self, name, price, quantity) -> None:
+#         self.name = name
+#         self.price = price
+#         self.quantity = quantity
+
+#     def get_total_price(self):
+#         return self.price * self.quantity
+    
+#     def make_purchase(self, numer):
+#         if numer < self.quantity:
+#             return self.quantity - numer
+#         else:
+#             return f'невозможно братан, у тебя товара {self.quantity}, а ты хочешь уменьшить товара на {numer} количество'
+
+# product = Product('Гречка', 6, 13)
+# total_price = product.get_total_price()
+# purchase = product.make_purchase(10)
+# print(product.name)
+# print(total_price)
+# print(purchase)        
+
+    
