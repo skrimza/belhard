@@ -38,3 +38,4 @@ class CardCreater(Card):
 CardCreater.create(5)
 for card in CardCreater.card:
     print(f'номер карты: {card.card_number}, дисконт: {card._discount}')
+
