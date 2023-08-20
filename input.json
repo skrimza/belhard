@@ -1,0 +1,7 @@
+{
+    "name": "Vasya",
+    "age": 23,
+    "is_human": true,
+    "phone_number": null,
+    "languages": ["ru", "en"]
+}
