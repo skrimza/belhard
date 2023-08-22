@@ -1,8 +1,7 @@
-name,age,is_human,phone_number
-Vasya,24,true,null
-Petya,29,true,+375336062072
+name,is_published
+Vasya,true
+Petya,true
+Ilya,false
 
-Ilya,29,True,+375291739013
-Ilya,29,True,+375291739013
-Ilya,29,True,+375291739013
-Ilya,29,True,+375291739013
+Sandra,true
+
