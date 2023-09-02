@@ -1,6 +1,6 @@
 from sqlite3 import *
 from pydantic import BaseModel, Field
-from csv import DictReader, reader, writer, DictWriter
+from csv import DictReader, DictWriter
 
 conn = connect('database.sqlite3')
 cur = conn.cursor()
