@@ -56,7 +56,6 @@ class PySchem(BaseModel):
             sqlite_del = '''
                 DELETE FROM category WHERE IS_PUBLISHED = ?;     
             '''
-            
             curs.execute(sqlite_del, (False, ))
             connection.commit()
     
@@ -64,8 +63,6 @@ class PySchem(BaseModel):
     def into_csv(cls, dict_read):
         data = dict_read
         with (connect('database.sqlite3') as connection):
-            
-            
             cursor = connection.cursor()
             from_db = '''SELECT NAME, IS_PUBLISHED FROM category'''
             cursor.execute(from_db)
