@@ -2,41 +2,46 @@ from sqlalchemy import (Column,
                         TIMESTAMP, 
                         ForeignKey, 
                         INTEGER, 
-                        BOOLEAN, 
                         VARCHAR, 
-                        TEXT,
-                        create_engine,
-                        DateTime,
                         DATE,
-                        DATETIME)
+                        DATETIME,
+                        create_engine)
 from sqlalchemy.orm import DeclarativeBase, declared_attr, sessionmaker
 from typing import Optional, Union
 from pydantic import BaseModel, Field, EmailStr
 
-# class Base(DeclarativeBase):
-#    id = Column(int, primary_key=True)
+class Base(DeclarativeBase):
+    # базовая модель для создания таблиц данных
+   id = Column(int, primary_key=True)
+   
+   engine = create_engine('postgresql://skrimza:60620IK@127.0.0.1:5432/belhard')
+   session = sessionmaker(bind=engine)
     
-#     @declared_attr
-#     def __tablename__(cls):
-#         return ''.join(f'_{i.lower()}' if i.isupper() else i for i in cls.__name__).strip('_')
+    @declared_attr
+    def __tablename__(cls) -> str:
+        # Генерация названий таблиц исходя из названий классов
+        return ''.join(f'_{i.lower()}' if i.isupper() else i for i in cls.__name__).strip('_')
 
-# class Personal(Base):
-#     name = Column(VARCHAR(24), nullable=False, index=True)
-#     email = Column(VARCHAR(64), unique=True, nullable=False, index=True)
-#     status = Column(INTEGER, nullable=False)
-#     date_publish = Column(TIMESTAMP, default=DateTime.now())
+class Personal(Base):
+    # создание таблицы personal для записи данных персонала
+    name = Column(VARCHAR(24), nullable=False, index=True)
+    email = Column(VARCHAR(64), unique=True, nullable=False, index=True)
+    status = Column(INTEGER, nullable=False)
+    date_publish = Column(TIMESTAMP, default=DATETIME.now())
 
     
-# class Guest(Base):
-#     name = Column(VARCHAR(24), nullable=False, index=True)
-#     email = Column(VARCHAR(64), unique=True, nullable=False)
-#     phone_number = Column(VARCHAR(16), unique=True, nullable=True)
-#     country = Column(VARCHAR(24), nullable=True)
-#     date_publish = Column(TIMESTAMP, default=DateTime.now())
-
-
+class Guest(Base):
+    # создание таблицы Guest для записи данных гостя
+    name = Column(VARCHAR(24), nullable=False, index=True)
+    email = Column(VARCHAR(64), unique=True, nullable=False)
+    phone_number = Column(VARCHAR(16), unique=True, nullable=True)
+    country = Column(VARCHAR(24), nullable=True)
+    date_publish = Column(TIMESTAMP, default=DATETIME.now())
+    personal_id = Column(INTEGER, ForeignKey('personal.id', ondelete='CASCADE'), nullable=False)
 
 class MyCat:
+    # Данный класс проводит проверку 
+    # введенного номера таблицы пользователем
     
     @classmethod
     def choise_db(cls, choise):
@@ -46,35 +51,86 @@ class MyCat:
 
 
 class FirstScheme(BaseModel):
+    # первая схема базовой модели для 
+    # валидации данных к таблице Personal
     name: str = Field(..., min_length=4, max_length=16)
     email: EmailStr = Field(...)
     status: int = Field(le=5)
     
     class Config:
-        orm_mode = True
+        from_attributes = True
     
 class SecondScheme(BaseModel):
+    # вторая схема базовой модели для 
+    # валидации данных к таблице Personal
     name: str = Field(..., min_length=4, max_length=16)
     email: EmailStr = Field(...)
     phone_number: Optional[str]
     country: str = Field(..., max_length=36)
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+def menu():
+    while True:
+        print("Выберете действие:" end='\t')
+        print("1. Ввести данные" end='\t')
+        print("2. Получить все данные" end='\t')
+        print("3. Вернуться к списку таблиц" end='\t')
+        choise = input("Введите Ваш выбор (1,2,3): ")
+        if choise == '1':
+            foo_start(res_my_cat)
+        elif choise == '2':
+            retrieve_data(res_my_cat)
+        elif choise == '3':
+            return
+        else:
+            print('Неправильный выбор, пожалуйста, выберете 1,2 или 3.')
+            
 def foo_start(res_my_cat):
-    if res_my_cat == 1:
-        result = FirstScheme(name=input('Введите имя: '), 
-                            email=input('Введите Email:'), 
-                            status=int(input('Введите Ваш персональный статус: ')))
-        print(result.model_dump())
-    else:
-        result = SecondScheme(name=input('Введите имя: '), 
-                            email=input('Введите Email:'), 
-                            phone_number=input('Введите номер телефона: '),
-                            country=input('Введите Вашу страну: '))
-        print(result.model_dump())
+    # функция для проверки выбора таблицы данных 
+    # пользователя
+    while True:
+        try:
+            if res_my_cat == 1:
+                with Personal.session() as session:
+                    result = FirstScheme(name=input('Введите имя: '), 
+                                        email=input('Введите Email: '), 
+                                        status=int(input('Введите персональный статус: ')))
+                    session.add_all(result)
+                    session.commit()
+            else:
+                with Guest.session() as session:
+                    result = SecondScheme(name=input('Введите имя: '), 
+                                        email=input('Введите Email: '), 
+                                        phone_number=input('Введите номер телефона: '),
+                                        country=input('Введите Вашу страну: '))
+                    session.add_all(result)
+                    session.commit()
+            print('Данные успешно внесены')
+            break
+        except Exception as e:
+            print('Ошибка при вводе данных:', str(e))
+            retry = input('Хотите повторно ввести данные? (да/нет): ')
+            if retry.lower() != 'да':
+                break
 
-choise = input('таблица данных(1, 2): ')
+def retrieve_data(res_my_cat):
+    if res_my_cat == 1:
+        with Personal.session() as session:
+            data = session.query(Personal).all()
+            for item in data:
+                print(item.__dict__)
+    else:
+        with Guest.session() as session:
+            data = session.query(Guest).all()
+            for item in data:
+                print(item.__dict__)
+        
+while True:
+    choise = input('таблица данных(1, 2) или "q" для выхода из программы: ')
+    if choise.lower() == 'q':
+        break
+    
 res_my_cat = MyCat().choise_db(choise)
-foo_start(res_my_cat)
+menu()
