@@ -131,6 +131,7 @@ while True:
     choise = input('таблица данных(1, 2) или "q" для выхода из программы: ')
     if choise.lower() == 'q':
         break
-    
+
+  
 res_my_cat = MyCat().choise_db(choise)
 menu()
