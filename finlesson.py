@@ -73,10 +73,10 @@ class SecondScheme(BaseModel):
 
 def menu():
     while True:
-        print("Выберете действие:" end='\t')
-        print("1. Ввести данные" end='\t')
-        print("2. Получить все данные" end='\t')
-        print("3. Вернуться к списку таблиц" end='\t')
+        print ("Выберете действие:" end='\t')
+        print ("1. Ввести данные" end='\t')
+        print ("2. Получить все данные" end='\t')
+        print ("3. Вернуться к списку таблиц" end='\t')
         choise = input("Введите Ваш выбор (1,2,3): ")
         if choise == '1':
             foo_start(res_my_cat)
