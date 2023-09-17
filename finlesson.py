@@ -3,21 +3,19 @@ from sqlalchemy import (Column,
                         ForeignKey, 
                         INTEGER, 
                         VARCHAR, 
-                        DATE,
-                        DATETIME,
                         create_engine)
 from sqlalchemy.orm import DeclarativeBase, declared_attr, sessionmaker
 from typing import Optional, Union
 from pydantic import BaseModel, Field, EmailStr
+from datetime import datetime
 
 class Base(DeclarativeBase):
     # базовая модель для создания таблиц данных
-   id = Column(int, primary_key=True)
-   
-   engine = create_engine('postgresql://skrimza:60620IK@127.0.0.1:5432/belhard')
-   session = sessionmaker(bind=engine)
+    id = Column(INTEGER, primary_key=True)
+    engine = create_engine('postgresql://skrimza:60620IK@127.0.0.1:5432/belhard')
+    session = sessionmaker(bind=engine)
     
-    @declared_attr
+    @declared_attr.directive
     def __tablename__(cls) -> str:
         # Генерация названий таблиц исходя из названий классов
         return ''.join(f'_{i.lower()}' if i.isupper() else i for i in cls.__name__).strip('_')
@@ -27,7 +25,7 @@ class Personal(Base):
     name = Column(VARCHAR(24), nullable=False, index=True)
     email = Column(VARCHAR(64), unique=True, nullable=False, index=True)
     status = Column(INTEGER, nullable=False)
-    date_publish = Column(TIMESTAMP, default=DATETIME.now())
+    date_publish = Column(TIMESTAMP, default=datetime.now())
 
     
 class Guest(Base):
@@ -36,7 +34,7 @@ class Guest(Base):
     email = Column(VARCHAR(64), unique=True, nullable=False)
     phone_number = Column(VARCHAR(16), unique=True, nullable=True)
     country = Column(VARCHAR(24), nullable=True)
-    date_publish = Column(TIMESTAMP, default=DATETIME.now())
+    date_publish = Column(TIMESTAMP, default=datetime.now())
     personal_id = Column(INTEGER, ForeignKey('personal.id', ondelete='CASCADE'), nullable=False)
 
 class MyCat:
@@ -55,7 +53,7 @@ class FirstScheme(BaseModel):
     # валидации данных к таблице Personal
     name: str = Field(..., min_length=4, max_length=16)
     email: EmailStr = Field(...)
-    status: int = Field(le=5)
+    status: int = Field(default=0)
     
     class Config:
         from_attributes = True
@@ -67,21 +65,22 @@ class SecondScheme(BaseModel):
     email: EmailStr = Field(...)
     phone_number: Optional[str]
     country: str = Field(..., max_length=36)
+    personal_id: int
     
     class Config:
         from_attributes = True
 
-def menu():
+def menu(table: int):
     while True:
-        print ("Выберете действие:" end='\t')
-        print ("1. Ввести данные" end='\t')
-        print ("2. Получить все данные" end='\t')
-        print ("3. Вернуться к списку таблиц" end='\t')
+        print ("Выберете действие:")
+        print ("1. Ввести данные")
+        print ("2. Получить все данные")
+        print ("3. Вернуться к списку таблиц")
         choise = input("Введите Ваш выбор (1,2,3): ")
         if choise == '1':
-            foo_start(res_my_cat)
+            foo_start(table)
         elif choise == '2':
-            retrieve_data(res_my_cat)
+            retrieve_data(table)
         elif choise == '3':
             return
         else:
@@ -94,20 +93,26 @@ def foo_start(res_my_cat):
         try:
             if res_my_cat == 1:
                 with Personal.session() as session:
-                    result = FirstScheme(name=input('Введите имя: '), 
+                    result = Personal(**FirstScheme(name=input('Введите имя: '), 
                                         email=input('Введите Email: '), 
-                                        status=int(input('Введите персональный статус: ')))
-                    session.add_all(result)
+                                        status=int(input('Введите персональный статус: '))).model_dump())
+                    session.add(result)
                     session.commit()
+                    session.refresh(result)
             else:
                 with Guest.session() as session:
-                    result = SecondScheme(name=input('Введите имя: '), 
+                    result = Guest(**SecondScheme(name=input('Введите имя: '), 
                                         email=input('Введите Email: '), 
                                         phone_number=input('Введите номер телефона: '),
-                                        country=input('Введите Вашу страну: '))
-                    session.add_all(result)
+                                        country=input('Введите Вашу страну: '),
+                                        personal_id=int(input('Введите ID personal: '))).model_dump())
+                    session.add(result)
                     session.commit()
+                    session.refresh(result)
             print('Данные успешно внесены')
+            sasha = result.__dict__
+            del sasha['_sa_instance_state']
+            print(sasha)
             break
         except Exception as e:
             print('Ошибка при вводе данных:', str(e))
@@ -118,20 +123,19 @@ def foo_start(res_my_cat):
 def retrieve_data(res_my_cat):
     if res_my_cat == 1:
         with Personal.session() as session:
-            data = session.query(Personal).all()
+            data = session.query(Personal.id, Personal.name, Personal.status, Personal.email).all()
             for item in data:
-                print(item.__dict__)
+                print([*item])
     else:
         with Guest.session() as session:
-            data = session.query(Guest).all()
+            data = session.query(Guest.id, Guest.name, Guest.email, Guest.phone_number, Guest.country).all()
             for item in data:
-                print(item.__dict__)
-        
-while True:
-    choise = input('таблица данных(1, 2) или "q" для выхода из программы: ')
-    if choise.lower() == 'q':
-        break
+                print([*item])
 
-  
-res_my_cat = MyCat().choise_db(choise)
-menu()
+
+while True:
+    choise = input('таблица данных(1, 2) или "q" для выхода из программы: ').strip()
+    if choise == '1':
+        menu(1)
+    elif choise == '2':
+        menu(2)
