@@ -27,6 +27,7 @@ class Base(DeclarativeBase):
         # Генерация названий таблиц исходя из названий классов
         return ''.join(f'_{i.lower()}' if i.isupper() else i for i in cls.__name__).strip('_')
 
+
 class Personal(Base):
     # создание таблицы personal для записи данных персонала
     name = Column(VARCHAR(24), nullable=False, index=True)
@@ -44,15 +45,14 @@ class Guest(Base):
     date_publish = Column(TIMESTAMP, default=datetime.now())
     personal_id = Column(INTEGER, ForeignKey('personal.id', ondelete='CASCADE'), nullable=False)
 
-class MyCat:
-    # Данный класс проводит проверку 
-    # введенного номера таблицы пользователем
-    
-    @classmethod
-    def choise_db(cls, choise):
-        while int(choise) not in [1, 2]:
-            choise = input('Неправильно, еще раз (1, 2): ')
-        return int(choise)
+# class MyCat:
+#     # Данный класс проводит проверку 
+#     # введенного номера таблицы пользователем
+#     @classmethod
+#     def choise_db(cls, choise):
+#         while int(choise) not in [1, 2]:
+#             choise = input('Неправильно, еще раз (1, 2): ')
+#         return int(choise)
 
 
 class FirstScheme(BaseModel):
@@ -64,7 +64,8 @@ class FirstScheme(BaseModel):
     
     class Config:
         from_attributes = True
-    
+        
+         
 class SecondScheme(BaseModel):
     # вторая схема базовой модели для 
     # валидации данных к таблице Personal
@@ -76,6 +77,7 @@ class SecondScheme(BaseModel):
     
     class Config:
         from_attributes = True
+
 
 def menu(table: int):
     while True:
@@ -89,10 +91,11 @@ def menu(table: int):
         elif choise == '2':
             retrieve_data(table)
         elif choise == '3':
-            return
+            return choise_of_table()
         else:
             print('Неправильный выбор, пожалуйста, выберете 1,2 или 3.')
-            
+
+         
 def foo_start(res_my_cat):
     # функция для проверки выбора таблицы данных 
     # пользователя
@@ -144,11 +147,14 @@ def retrieve_data(res_my_cat):
                 print(final_dict)
 
 
-while True:
-    choise = input('таблица данных(1, 2) или "q" для выхода из программы: ').strip()
-    if choise == '1':
-        menu(1)
-    elif choise == '2':
-        menu(2)
-    break
+def choise_of_table():
+    while True:
+        choise = input('таблица данных(1, 2) или "q" для выхода из программы: ').strip()
+        if choise == '1':
+            menu(1)
+        elif choise == '2':
+            menu(2)
+        break
+
+choise_of_table()
         
