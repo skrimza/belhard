@@ -3,7 +3,14 @@ from sqlalchemy import (Column,
                         ForeignKey, 
                         INTEGER, 
                         VARCHAR, 
-                        create_engine)
+                        create_engine,
+                        select,
+                        update,
+                        delete,
+                        or_,
+                        and_,
+                        any_,
+                        all_)
 from sqlalchemy.orm import DeclarativeBase, declared_attr, sessionmaker
 from typing import Optional, Union
 from pydantic import BaseModel, Field, EmailStr
@@ -110,9 +117,9 @@ def foo_start(res_my_cat):
                     session.commit()
                     session.refresh(result)
             print('Данные успешно внесены')
-            sasha = result.__dict__
-            del sasha['_sa_instance_state']
-            print(sasha)
+            final_dict = result.__dict__
+            del final_dict['_sa_instance_state']
+            print(final_dict)
             break
         except Exception as e:
             print('Ошибка при вводе данных:', str(e))
@@ -123,14 +130,18 @@ def foo_start(res_my_cat):
 def retrieve_data(res_my_cat):
     if res_my_cat == 1:
         with Personal.session() as session:
-            data = session.query(Personal.id, Personal.name, Personal.status, Personal.email).all()
+            data = session.query(Personal)
             for item in data:
-                print([*item])
+                final_dict = item.__dict__
+                del final_dict['_sa_instance_state']
+                print(final_dict)
     else:
         with Guest.session() as session:
-            data = session.query(Guest.id, Guest.name, Guest.email, Guest.phone_number, Guest.country).all()
+            data = session.query(Guest)
             for item in data:
-                print([*item])
+                final_dict = item.__dict__
+                del final_dict['_sa_instance_state']
+                print(final_dict)
 
 
 while True:
@@ -139,3 +150,5 @@ while True:
         menu(1)
     elif choise == '2':
         menu(2)
+    break
+        
